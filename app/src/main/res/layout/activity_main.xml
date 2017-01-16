@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -41,4 +42,13 @@
         android:id="@+id/lvItems"
         android:layout_above="@+id/btnAddItem"
         style="android:listViewStyle?attr/listDivider" />
+    <!--<co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView-->
+        <!--android:id="@+id/realm_recycler_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_above="@+id/btnAddItem"-->
+        <!--app:rrvLayoutType="LinearLayout"-->
+        <!--app:rrvSwipeToDelete="true"-->
+        <!--app:rrvEmptyLayoutId="@layout/to_do_empty_view"-->
+        <!--/>-->
 </RelativeLayout>

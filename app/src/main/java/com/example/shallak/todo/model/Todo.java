@@ -8,12 +8,12 @@ import io.realm.RealmObject;
 
 public class Todo extends RealmObject {
     private long id;
-
     private String text;
 
     public Todo(){
 
     }
+
 
     public Todo(long id, String text) {
         this.id = id;

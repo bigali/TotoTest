@@ -5,10 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.shallak.todo.model.Todo;
 
@@ -17,9 +15,8 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.RealmResults;
 
-import static com.example.shallak.todo.R.id.etNewItem;
-import static com.example.shallak.todo.R.id.lvItems;
 import static com.example.shallak.todo.Utils.SUID.id;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         items = new ArrayList<>();
+
         itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,items);
         lvItems.setAdapter(itemsAdapter);
         for (Todo todo : realm.where(Todo.class).findAll()) {
-
             items.add(todo.getText());
         }
         setupListViewListener();
@@ -56,9 +53,17 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                         items.remove(position);
                         itemsAdapter.notifyDataSetChanged();
+                        final RealmResults<Todo> results = realm.where(Todo.class).findAll();
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                Todo todo = results.get(position);
+                                todo.deleteFromRealm();
+                            }
+                        });
                     }
                 }
         );
@@ -76,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                // Add a person
                 Todo todo = realm.createObject(Todo.class);
                 todo.setId(id());
                 todo.setText(itemText);
