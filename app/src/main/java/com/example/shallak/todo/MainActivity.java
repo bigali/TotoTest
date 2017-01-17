@@ -1,5 +1,11 @@
 package com.example.shallak.todo;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,79 +23,73 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+import static com.example.shallak.todo.R.id.lvItems;
 import static com.example.shallak.todo.Utils.SUID.id;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<String> items;
-    ArrayAdapter<String> itemsAdapter;
-    @BindView(R.id.lvItems) ListView lvItems;
-    @BindView(R.id.etNewItem) EditText etNewItem;
-    private Realm realm;
 
+    private static final int NUM_PAGES = 2;
+    @BindView(R.id.vpPager) ViewPager mPager;
+    private PagerAdapter mPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
         Realm.init(this);
 
-        realm = Realm.getDefaultInstance();
+        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
 
-
-        items = new ArrayList<>();
-
-        itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,items);
-        lvItems.setAdapter(itemsAdapter);
-        for (Todo todo : realm.where(Todo.class).findAll()) {
-            items.add(todo.getText());
-        }
-        setupListViewListener();
     }
 
-    private void setupListViewListener() {
-        lvItems.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                        items.remove(position);
-                        itemsAdapter.notifyDataSetChanged();
-                        final RealmResults<Todo> results = realm.where(Todo.class).findAll();
-                        realm.executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                Todo todo = results.get(position);
-                                todo.deleteFromRealm();
-                            }
-                        });
-                    }
-                }
-        );
+
+
+
+    // TODO: 17/01/2017 close the realm connexion
+
+    public class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return TodoListFragment.newInstance(0, "Page # 1");
+                case 1:
+                    return GitHubFragment.newInstance(1, "Page # 2");
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_PAGES;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return "Page " + position;
+        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        realm.close(); // Remember to close Realm when done.
-    }
-
-    public void onAddItem(View view) {
-        final String itemText= etNewItem.getText().toString();
-        if(!itemText.equals("")){
-            itemsAdapter.add(itemText);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    Todo todo = realm.createObject(Todo.class);
-                    todo.setId(id());
-                    todo.setText(itemText);
-                }
-            });
-            etNewItem.setText("");
+    public void onBackPressed() {
+        if (mPager.getCurrentItem() == 0) {
+            // If the user is currently looking at the first step, allow the system to handle the
+            // Back button. This calls finish() on this activity and pops the back stack.
+            super.onBackPressed();
+        } else {
+            // Otherwise, select the previous step.
+            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
         }
-
-
     }
+
+
 }
