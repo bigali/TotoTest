@@ -77,16 +77,19 @@ public class MainActivity extends AppCompatActivity {
 
     public void onAddItem(View view) {
         final String itemText= etNewItem.getText().toString();
-        itemsAdapter.add(itemText);
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                Todo todo = realm.createObject(Todo.class);
-                todo.setId(id());
-                todo.setText(itemText);
-            }
-        });
-        etNewItem.setText("");
+        if(!itemText.equals("")){
+            itemsAdapter.add(itemText);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Todo todo = realm.createObject(Todo.class);
+                    todo.setId(id());
+                    todo.setText(itemText);
+                }
+            });
+            etNewItem.setText("");
+        }
+
 
     }
 }
